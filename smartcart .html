@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCart 🛒</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  [data-theme="dark"] {
+    --bg: #0a0a0f;
+    --bg2: #0f172a;
+    --border: #1e293b;
+    --border2: #334155;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --text4: #334155;
+    --tag-bg: #1e293b;
+    --tag-color: #94a3b8;
+    --progress-track: #1e293b;
+    --item-bg: #0a0a0f;
+    --item-have-bg: #1e293b;
+    --item-have-color: #334155;
+    --input-bg: #0a0a0f;
+    --theme-btn-bg: #1e293b;
+    --theme-btn-color: #f1c40f;
+  }
+
+  [data-theme="light"] {
+    --bg: #f8fafc;
+    --bg2: #ffffff;
+    --border: #e2e8f0;
+    --border2: #cbd5e1;
+    --text: #0f172a;
+    --text2: #475569;
+    --text3: #94a3b8;
+    --text4: #cbd5e1;
+    --tag-bg: #f1f5f9;
+    --tag-color: #475569;
+    --progress-track: #e2e8f0;
+    --item-bg: #f1f5f9;
+    --item-have-bg: #e2e8f0;
+    --item-have-color: #cbd5e1;
+    --input-bg: #f1f5f9;
+    --theme-btn-bg: #e2e8f0;
+    --theme-btn-color: #6366f1;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 100px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  [data-theme="dark"] body {
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #1e1b4b33 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #0f172a55 0%, transparent 60%);
+  }
+
+  .container { max-width: 800px; margin: 0 auto; }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+
+  .theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: var(--theme-btn-bg);
+    color: var(--theme-btn-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.04em;
+  }
+
+  .theme-toggle-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px #00000033;
+  }
+
+  .theme-icon { font-size: 1rem; line-height: 1; }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8, #38bdf8, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text3);
+    margin-bottom: 32px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tab.active {
+    background: #818cf8;
+    color: #ffffff;
+    border-color: #818cf8;
+  }
+
+  .tab:hover:not(.active) {
+    border-color: #818cf8;
+    color: #818cf8;
+  }
+
+  .category {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .category.visible { display: block; }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .category-icon { font-size: 1.4rem; }
+
+  .category-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .category-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: #38bdf8;
+    margin-left: auto;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+
+  .item-btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--item-bg);
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .item-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  .item-btn.need {
+    background: #f87171;
+    border-color: #f87171;
+    color: #ffffff;
+  }
+
+  .item-btn.have {
+    background: var(--item-have-bg);
+    border-color: var(--border);
+    color: var(--item-have-color);
+    text-decoration: line-through;
+  }
+
+  .item-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .item-btn.need .item-dot { background: #ffffff; }
+  .item-btn.have .item-dot { background: var(--border2); }
+
+  .add-custom {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .custom-input {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .custom-input:focus { border-color: #818cf8; }
+
+  .add-btn {
+    background: #818cf8;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .add-btn:hover { background: #6366f1; }
+
+  /* ── BUY LIST SECTION ── */
+  .buy-list-section {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+    display: none;
+  }
+
+  .buy-list-section.visible { display: block; }
+
+  .buy-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .buy-list-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f87171;
+  }
+
+  .buy-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: #f87171;
+  }
+
+  .buy-category { margin-bottom: 14px; }
+
+  .buy-category-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .buy-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .buy-tag {
+    background: #f8717122;
+    border: 1px solid #f87171;
+    color: #f87171;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── SHOW COMPLETE LIST BUTTON (inline, below buy list) ── */
+  .show-complete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px 20px;
+    border-radius: 12px;
+    border: 1.5px dashed #818cf8;
+    background: transparent;
+    color: #818cf8;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.04em;
+  }
+
+  .show-complete-btn:hover {
+    background: #818cf822;
+    border-style: solid;
+    transform: translateY(-1px);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: #00000088;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .modal-close {
+    background: var(--border2);
+    border: none;
+    border-radius: 99px;
+    padding: 6px 14px;
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+
+  .modal-close:hover { background: #f87171; color: white; }
+
+  .full-list-text {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    margin-bottom: 16px;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .copy-btn {
+    width: 100%;
+    background: #4ade80;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    color: #0a0a0f;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .copy-btn:hover { background: #22c55e; }
+  .copy-btn.copied { background: #818cf8; color: white; }
+
+  /* ── FAB ── */
+  .fab-container {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+  }
+
+  .fab-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px #00000044;
+    white-space: nowrap;
+  }
+
+  .fab-btn:hover {
+    background: var(--border2);
+    color: var(--text);
+    transform: translateY(-2px);
+  }
+
+  .fab-btn.primary {
+    background: #f87171;
+    border-color: #f87171;
+    color: white;
+  }
+
+  .fab-btn.primary:hover { background: #ef4444; }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap { margin-bottom: 24px; }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .progress-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f87171;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: var(--progress-track);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #f87171, #818cf8);
+    box-shadow: 0 0 10px #f8717166;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  @media print {
+    .fab-container { display: none; }
+    .tabs { display: none; }
+    .add-custom { display: none; }
+    .category { display: none !important; }
+    .buy-list-section { display: block !important; }
+    .modal-overlay { display: none !important; }
+    .top-bar { display: none; }
+    .show-complete-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- FAB Buttons -->
+<div class="fab-container">
+  <button class="fab-btn primary" onclick="generateBuyList()">🛒 Buy List</button>
+  <button class="fab-btn" onclick="showFullList()">📋 Full List</button>
+  <button class="fab-btn" onclick="resetAll()">↺ Reset</button>
+  <button class="fab-btn" onclick="window.print()">🖨 Print</button>
+</div>
+
+<!-- Full List Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📋 Complete Selected List</span>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('visible')">✕ Close</button>
+    </div>
+    <div class="full-list-text" id="full-list-text"></div>
+    <button class="copy-btn" id="copy-btn" onclick="copyList()">📋 Copy to Clipboard</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Top bar with Switch Theme button -->
+  <div class="top-bar">
+    <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn">
+      <span class="theme-icon" id="theme-icon">☀️</span>
+      <span id="theme-label">Switch Theme</span>
+    </button>
+  </div>
+
+  <h1>SmartCart 🛒</h1>
+  <p class="subtitle">Tap items you need · Red = buy it · Strikethrough = have it</p>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-top">
+      <span class="progress-label">Need to Buy</span>
+      <span class="progress-num" id="progress-num">0 items</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="categories"></div>
+
+  <!-- Buy List Section -->
+  <div class="buy-list-section" id="buy-list-section">
+    <div class="buy-list-header">
+      <span class="buy-list-title">🛒 Your Buy List</span>
+      <span class="buy-count" id="buy-count"></span>
+    </div>
+    <div id="buy-list-content"></div>
+
+    <!-- ✅ NEW: Show Complete List button, visible after buy list is generated -->
+    <button class="show-complete-btn" id="show-complete-btn" onclick="showFullList()">
+      📋 Show Complete List &amp; Copy
+    </button>
+  </div>
+
+</div>
+
+<script>
+const groceryData = {
+  "🌾 Grains & Flours": [
+    "Basmati Rice","Sona Masoori Rice","Idli Rice","Parboiled Rice","Brown Rice",
+    "Wheat Flour (Atta)","Maida (All Purpose Flour)","Rice Flour","Besan (Gram Flour)",
+    "Rava / Sooji","Poha (Flattened Rice)","Sabudana (Tapioca)","Ragi Flour",
+    "Jowar Flour","Bajra Flour","Cornflour","Bread Crumbs","Oats",
+    "Semiya (Vermicelli)","Idiyappam Flour"
+  ],
+  "🫘 Pulses & Lentils": [
+    "Toor Dal (Pigeon Peas)","Moong Dal (Yellow)","Moong Dal (Green Whole)",
+    "Chana Dal","Masoor Dal (Red Lentils)","Urad Dal (Black)","Urad Dal (White Split)",
+    "Rajma (Kidney Beans)","Kabuli Chana (Chickpeas)","Kala Chana (Black Chickpeas)",
+    "Green Peas (Dried)","Lobia (Black-eyed Peas)","Peanuts","Soya Chunks"
+  ],
+  "🌶 Spices & Masalas": [
+    "Mustard Seeds","Cumin Seeds (Jeera)","Coriander Seeds","Fenugreek Seeds (Methi)",
+    "Fennel Seeds (Saunf)","Carom Seeds (Ajwain)","Kalonji (Nigella Seeds)",
+    "Turmeric Powder","Red Chili Powder","Coriander Powder","Cumin Powder",
+    "Garam Masala","Sambar Powder","Rasam Powder","Biryani Masala","Chaat Masala",
+    "Pav Bhaji Masala","Kitchen King Masala","Pepper Powder","Cardamom (Elaichi)",
+    "Cinnamon (Dalchini)","Cloves (Lavang)","Bay Leaves (Tej Patta)","Star Anise",
+    "Hing (Asafoetida)","Dry Red Chillies","Kashmiri Chili Powder","Amchur (Dry Mango Powder)",
+    "Tamarind","Curry Leaves (Dried)","Kokum","Mace (Javitri)","Nutmeg (Jaiphal)"
+  ],
+  "🫙 Oils & Ghee": [
+    "Sunflower Oil","Groundnut Oil","Coconut Oil","Sesame Oil (Gingelly)",
+    "Mustard Oil","Refined Oil","Ghee","Olive Oil","Rice Bran Oil"
+  ],
+  "🥬 Vegetables": [
+    "Onions","Tomatoes","Potatoes","Garlic","Ginger","Green Chillies",
+    "Carrots","Beans","Brinjal (Eggplant)","Cauliflower","Cabbage",
+    "Spinach (Palak)","Methi (Fenugreek Leaves)","Coriander Leaves",
+    "Mint Leaves","Curry Leaves (Fresh)","Drumstick (Moringa)","Raw Banana",
+    "Plantain Stem","Yam (Senai)","Colocasia (Arbi)","Bottle Gourd (Lauki)",
+    "Ridge Gourd","Bitter Gourd","Okra (Bhindi)","Pumpkin","Ash Gourd",
+    "Sweet Potato","Beetroot","Capsicum","Spring Onions","Leeks",
+    "Corn","Mushrooms","Raw Mango","Raw Papaya","Lotus Stem"
+  ],
+  "🍎 Fruits": [
+    "Bananas","Apples","Oranges","Lemons","Mangoes","Pomegranate",
+    "Papaya","Guava","Grapes","Watermelon","Pineapple","Coconut",
+    "Chikoo (Sapota)","Custard Apple","Jackfruit","Tamarind (Fresh)"
+  ],
+  "🥛 Dairy": [
+    "Milk","Curd / Yogurt","Paneer","Butter","Cream","Cheese",
+    "Condensed Milk","Khoya / Mawa","Buttermilk (Chaas)","Lassi"
+  ],
+  "🫚 Dry Fruits & Nuts": [
+    "Cashews (Kaju)","Almonds (Badam)","Pistachios","Walnuts","Raisins (Kishmish)",
+    "Dates (Khajoor)","Figs (Anjeer)","Apricots","Groundnuts","Desiccated Coconut",
+    "Sesame Seeds (Til)","Poppy Seeds (Khus Khus)","Chia Seeds","Flax Seeds",
+    "Sunflower Seeds","Pumpkin Seeds","Fox Nuts (Makhana)"
+  ],
+  "🍝 Western & International": [
+    "Pasta","Noodles","Bread","Brown Bread","Burger Buns","Pita Bread",
+    "Tortillas","Spaghetti","Macaroni","Breakfast Cereal","Granola",
+    "Cheese Slices","Mayonnaise","Ketchup","Mustard Sauce","Hot Sauce",
+    "Soy Sauce","Vinegar","Worcestershire Sauce","Pesto"
+  ],
+  "🥫 Pantry Staples": [
+    "Sugar","Jaggery","Honey","Salt","Rock Salt (Sendha Namak)",
+    "Baking Powder","Baking Soda","Yeast","Vanilla Extract","Cocoa Powder",
+    "Coconut Milk (Canned)","Tomato Puree","Tomato Paste","Green Chili Sauce",
+    "Pickle (Achar)","Papad","Chutney Powder","Idli / Dosa Batter (Ready)",
+    "Cooking Soda","Food Color","Rose Water","Kewra Water"
+  ],
+  "☕ Beverages": [
+    "Tea Leaves","Green Tea","Coffee Powder","Filter Coffee","Instant Coffee",
+    "Horlicks / Bournvita","Cocoa / Hot Chocolate","Fruit Juice","Coconut Water"
+  ],
+  "🧹 Household": [
+    "Dish Wash Soap","Dish Wash Liquid","Floor Cleaner","Toilet Cleaner",
+    "Washing Powder","Fabric Softener","Mosquito Repellent","Garbage Bags",
+    "Aluminium Foil","Cling Wrap","Kitchen Tissues","Tissue Paper",
+    "Hand Wash","Soap","Shampoo","Toothpaste","Toothbrush"
+  ]
+};
+
+const state = {};
+
+function init() {
+  const tabsEl = document.getElementById('tabs');
+  const catsEl = document.getElementById('categories');
+
+  const allTab = document.createElement('button');
+  allTab.className = 'tab active';
+  allTab.textContent = 'All';
+  allTab.onclick = () => showAll();
+  tabsEl.appendChild(allTab);
+
+  Object.entries(groceryData).forEach(([cat, items]) => {
+    const tab = document.createElement('button');
+    tab.className = 'tab';
+    tab.textContent = cat;
+    tab.setAttribute('data-cat', cat);
+    tab.onclick = () => filterCat(cat);
+    tabsEl.appendChild(tab);
+
+    const block = document.createElement('div');
+    block.className = 'category visible';
+    block.setAttribute('data-cat', cat);
+    const safeId = safeid(cat);
+    block.innerHTML = `
+      <div class="category-header">
+        <span class="category-icon">${cat.split(' ')[0]}</span>
+        <span class="category-title">${cat.split(' ').slice(1).join(' ')}</span>
+        <span class="category-count" id="count-${safeId}">0 needed</span>
+      </div>
+      <div class="items-grid" id="grid-${safeId}"></div>
+      <div class="add-custom">
+        <input type="text" class="custom-input" placeholder="Add custom item..." id="custom-${safeId}" onkeydown="if(event.key==='Enter') addCustom('${cat.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+        <button class="add-btn" onclick="addCustom('${cat.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">+ Add</button>
+      </div>
+    `;
+    catsEl.appendChild(block);
+    items.forEach(item => renderItem(item, cat));
+  });
+
+  updateProgress();
+  updateThemeIcon();
+}
+
+function safeid(str) {
+  return str.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function renderItem(item, cat) {
+  const grid = document.getElementById(`grid-${safeid(cat)}`);
+  if (!grid) return;
+  const btn = document.createElement('button');
+  btn.className = 'item-btn';
+  btn.id = `item-${safeid(item)}`;
+  btn.innerHTML = `<span class="item-dot"></span>${item}`;
+  btn.onclick = () => toggleItem(item, cat);
+  grid.appendChild(btn);
+}
+
+function toggleItem(item, cat) {
+  const current = state[item];
+  if (!current) state[item] = 'need';
+  else if (current === 'need') state[item] = 'have';
+  else delete state[item];
+  updateItemBtn(item);
+  updateCategoryCount(cat);
+  updateProgress();
+}
+
+function updateItemBtn(item) {
+  const btn = document.getElementById(`item-${safeid(item)}`);
+  if (!btn) return;
+  btn.className = 'item-btn' + (state[item] ? ' ' + state[item] : '');
+}
+
+function updateCategoryCount(cat) {
+  const items = groceryData[cat] || [];
+  const count = items.filter(i => state[i] === 'need').length;
+  const el = document.getElementById(`count-${safeid(cat)}`);
+  if (el) el.textContent = count > 0 ? `${count} needed` : '0 needed';
+}
+
+function updateProgress() {
+  const needCount = Object.values(state).filter(v => v === 'need').length;
+  document.getElementById('progress-num').textContent = `${needCount} items`;
+  const total = Object.keys(state).length;
+  const pct = total > 0 ? (needCount / Math.max(total, 1)) * 100 : 0;
+  document.getElementById('progress-fill').style.width = Math.min(pct, 100) + '%';
+}
+
+function showAll() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab').classList.add('active');
+  document.querySelectorAll('.category').forEach(c => c.classList.add('visible'));
+}
+
+function filterCat(cat) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.getAttribute('data-cat') === cat);
+  });
+  document.querySelectorAll('.category').forEach(c => {
+    c.classList.toggle('visible', c.getAttribute('data-cat') === cat);
+  });
+}
+
+function addCustom(cat) {
+  const input = document.getElementById(`custom-${safeid(cat)}`);
+  const val = input.value.trim();
+  if (!val) return;
+  if (!groceryData[cat]) groceryData[cat] = [];
+  groceryData[cat].push(val);
+  renderItem(val, cat);
+  input.value = '';
+}
+
+function generateBuyList() {
+  const section = document.getElementById('buy-list-section');
+  const content = document.getElementById('buy-list-content');
+  const countEl = document.getElementById('buy-count');
+  content.innerHTML = '';
+  let total = 0;
+
+  Object.entries(groceryData).forEach(([cat, items]) => {
+    const needed = items.filter(i => state[i] === 'need');
+    if (needed.length === 0) return;
+    total += needed.length;
+    const block = document.createElement('div');
+    block.className = 'buy-category';
+    block.innerHTML = `<div class="buy-category-name">${cat}</div><div class="buy-items">${needed.map(i => `<span class="buy-tag">${i}</span>`).join('')}</div>`;
+    content.appendChild(block);
+  });
+
+  if (total === 0) {
+    content.innerHTML = '<p style="font-family:\'Space Mono\',monospace;font-size:0.8rem;color:#64748b;">Nothing marked as needed yet. Tap items above to mark them.</p>';
+  }
+
+  countEl.textContent = `${total} item${total !== 1 ? 's' : ''} to buy`;
+  section.classList.add('visible');
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function showFullList() {
+  let text = '';
+
+  Object.entries(groceryData).forEach(([cat, items]) => {
+    const needed = items.filter(i => state[i] === 'need');
+    if (needed.length === 0) return;
+    text += `${cat}\n`;
+    needed.forEach(i => { text += `  • ${i}\n`; });
+    text += '\n';
+  });
+
+  if (!text) {
+    text = 'Nothing selected yet.\nTap items above to mark what you need to buy.';
+  }
+
+  document.getElementById('full-list-text').textContent = text;
+  document.getElementById('copy-btn').textContent = '📋 Copy to Clipboard';
+  document.getElementById('copy-btn').className = 'copy-btn';
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function closeModal(event) {
+  if (event.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('visible');
+  }
+}
+
+function copyList() {
+  const text = document.getElementById('full-list-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.className = 'copy-btn copied';
+    setTimeout(() => {
+      btn.textContent = '📋 Copy to Clipboard';
+      btn.className = 'copy-btn';
+    }, 2000);
+  });
+}
+
+function resetAll() {
+  Object.keys(state).forEach(k => delete state[k]);
+  document.querySelectorAll('.item-btn').forEach(btn => btn.className = 'item-btn');
+  Object.keys(groceryData).forEach(cat => updateCategoryCount(cat));
+  updateProgress();
+  document.getElementById('buy-list-section').classList.remove('visible');
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  updateThemeIcon();
+}
+
+function updateThemeIcon() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+}
+
+init();
+</script>
+</body>
+</html>
