@@ -1,4 +1,5 @@
 #SmartCart 🛒
+
 The zero-dependency, ultra-responsive grocery ecosystem for the modern terminal and browser.
 SmartCart is a fast, lightweight web application designed to fix how we track household inventory. No massive frameworks, no endless NPM packages, and absolutely no clutter. Just pure, reactive frontend engineering tailored for lightning-fast shopping lists.
 
